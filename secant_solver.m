@@ -12,5 +12,34 @@
 %   x: estimate for root of fun
 %   exit_flag: an integer indicating whether or not the solver succeeded
 function [x, exit_flag] = secant_solver(fun,x0, x1,dxtol,ftol,max_iter,dxmax)
-    %your code here
+
+    for i = 1:max_iter
+       
+        if abs(fun(x1)) < ftol
+            x = x1;
+            exit_flag = 1;
+            return
+        end
+
+        x2 = x1 - fun(x1) * (x1 - x0) / (fun(x1) - fun(x0));
+
+        if abs(x2 - x1) > dxmax
+            x = x2;
+            exit_flag = -1;
+            return
+        end
+
+        if abs(x2 - x1) < dxtol
+            x = x2;
+            exit_flag = 2;
+            return
+        end
+
+        x0 = x1;
+        x1 = x2;
+    end
+        
+    x = x1;
+    exit_flag = 0;
+    disp("Did not converge within tolerance")
 end

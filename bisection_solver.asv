@@ -16,7 +16,7 @@ function [x, exit_flag] = bisection_solver(fun,x_left,x_right,dxtol,ftol,max_ite
     f_right = fun(x_right);
 
     if(sign(f_left) == sign(f_right))
-        % exit flag 1 is if signs are similar
+        % exit flag 1 is if 
         exit_flag = 1;
     end
 
@@ -40,7 +40,5 @@ function [x, exit_flag] = bisection_solver(fun,x_left,x_right,dxtol,ftol,max_ite
 
         x = midpoint;
     end
-
-    % exit flag 2 if did not reach convergance within iter max
-    exit_flag = 2;
+    disp("Did not converge within tolerance")
 end

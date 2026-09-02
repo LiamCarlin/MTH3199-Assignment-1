@@ -20,23 +20,13 @@ function [x, exit_flag] = newton_solver(fun,x0,dxtol,ftol,max_iter,dxmax)
         [fval, dfdx] = fun(x);
 
         if(abs(fval) < ftol)
-            exit_flag = 1;
             return
         end
-
-        if abs(x - x_cur) < dxtol
-            exit_flag = 2;
-            return
+        if abs(x_{i+1}-x_i) < dxtol
         end
 
-        
-        x_cur = x;
         x = x - fval / dfdx; 
-        if abs(x - x_cur) > dxmax
-            exit_flag = -1; 
-            return
-        end
+       
     end
-    exit_flag = 0;
     disp("Did not converge within tolerance")
 end
