@@ -4,11 +4,11 @@ function advanced_solver_test_template()
     xvals = linspace(-50,50,201);
     [yvals,~] = test_func01(xvals);
 
-    %hold on
-    %axis([-15,40,-50,80]);
-    %plot(xvals,yvals,'r','linewidth',2);
-    %plot(xvals,0*xvals,'k--','linewidth',1);
-    %xlabel('x'); ylabel('y'); title('Test Function 1');
+    hold on
+    axis([-15,40,-50,80]);
+    plot(xvals,yvals,'r','linewidth',2);
+    plot(xvals,0*xvals,'k--','linewidth',1);
+    xlabel('x'); ylabel('y'); title('Test Function 1');
 
     my_recorder = input_recorder();
     f_record = my_recorder.generate_recorder_fun(@test_func01);
@@ -23,7 +23,7 @@ function advanced_solver_test_template()
     %set solver parameters (Bisection)
 
     % %Newton's method example test
-     x0_guess = -5;
+     x0_guess = 2;
      %plot(x0_guess,test_func01(x0_guess),'bo','markerfacecolor','b','markersize',5);
     % 
     
@@ -33,7 +33,10 @@ function advanced_solver_test_template()
 
      error_lst = input_list - x_sol;
 
-     error_lst1 = error_lst(1:length(error_lst));
+     error_lst1 = error_lst(2:length(error_lst)-1);
+
+     length(error_lst)
+     length(error_lst1)
 
      x_n = input_list;
 
@@ -43,7 +46,7 @@ function advanced_solver_test_template()
 
      my_recorder.clear_input_list();
 
-     loglog(error_lst,error_lst1,'ro','markerfacecolor','r','markersize',10);
+     loglog(error_lst,error_lst1,'ro','markerfacecolor','r','markersize',1);
 
      %plot(x_sol,test_func01(x_sol),'go','markerfacecolor','g','markersize',5);
     
