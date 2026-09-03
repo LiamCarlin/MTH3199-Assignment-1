@@ -13,29 +13,29 @@
 %   x: estimate for root of fun
 %   exit_flag: an integer indicating whether or not the solver succeeded
 function [x, exit_flag] = newton_solver(fun,x0,dxtol,ftol,max_iter,dxmax)
-
     x = x0;
-
     for i = 1:max_iter
         [fval, dfdx] = fun(x);
 
-        if(abs(fval) < ftol)
+        if abs(fval) < ftol
             exit_flag = 1;
             return
         end
 
-        if abs(x - x_cur) < dxtol
+        x_new = x - fval / dfdx;
+
+        if abs(x_new - x) > dxmax
+            exit_flag = -1;
+            return
+        end
+
+        if abs(x_new - x) < dxtol
+            x = x_new;
             exit_flag = 2;
             return
         end
 
-        
-        x_cur = x;
-        x = x - fval / dfdx; 
-        if abs(x - x_cur) > dxmax
-            exit_flag = -1; 
-            return
-        end
+        x = x_new;
     end
     exit_flag = 0;
     disp("Did not converge within tolerance")
