@@ -1,73 +1,78 @@
-%template for testing your advanced root finding implementations
-%root finding code should be in separate files
+% Collect errors, filter them, fit a line, and plot.
 function advanced_solver_test_template()
-    xvals = linspace(-50,50,201);
-    [yvals,~] = test_func01(xvals);
+    num_trials = 1000;
+    % These starting guesses also bracket the root for bisection.
+    guess_list1 = linspace(-2,0,num_trials);
+    guess_list2 = linspace(1,2,num_trials);
+    filter_list = [1e-15, 1e-2, 1e-14, 1e-2, 2];
 
-    %hold on
-    %axis([-15,40,-50,80]);
-    %plot(xvals,yvals,'r','linewidth',2);
-    %plot(xvals,0*xvals,'k--','linewidth',1);
-    %xlabel('x'); ylabel('y'); title('Test Function 1');
+    dxtol = 1e-14;
+    ftol = 1e-14;
+    max_iter = 200;
+    dxmax = 1e7;
+    x_root = fzero(@test_func01,[0,1]);
 
     my_recorder = input_recorder();
     f_record = my_recorder.generate_recorder_fun(@test_func01);
-    
-    %set solver parameters 
-    dxtol = 1e-6;
-    ftol = 1e-14;
-    max_iter = 200;
-    dxmax = 1e7; %Newton and Secant only
+    x_current_list = [];
+    x_next_list = [];
+    index_list = [];
 
+    for n = 1:length(guess_list1)
+        my_recorder.clear_input_list();
+        x0 = guess_list1(n);
 
-    %set solver parameters (Bisection)
+        % Newton
+        % newton_solver(f_record,x0,dxtol,ftol,max_iter,dxmax);
+        % input_list = my_recorder.get_input_list();
+        % solver_name = 'Newton';
 
-    % %Newton's method example test
-     x0_guess = -5;
-     %plot(x0_guess,test_func01(x0_guess),'bo','markerfacecolor','b','markersize',5);
-    % 
-    
-     x_sol = newton_solver(f_record,x0_guess,dxtol,ftol,max_iter,dxmax);
+        % Bisection
+        % bisection_solver(f_record,x0,guess_list2(n),dxtol,ftol,max_iter);
+        % input_list = my_recorder.get_input_list();
+        % input_list = input_list(3:end); % Remove the two endpoint checks.
+        % solver_name = 'Bisection';
 
-     input_list = my_recorder.get_input_list();
+        % Secant
+        % secant_solver(f_record,x0,guess_list2(n),dxtol,ftol,max_iter,dxmax);
+        % input_list = my_recorder.get_input_list();
+        % input_list = [x0,input_list(1:4:end)]; % Four calls per full step.
+        % solver_name = 'Secant';
 
-     error_lst = input_list - x_sol;
+        % fzero
+         fzero(f_record,x0);
+         input_list = my_recorder.get_input_list();
+         solver_name = 'fzero';
 
-     error_lst1 = error_lst(1:length(error_lst));
+        x_current_list = [x_current_list,input_list(1:end-1)];
+        x_next_list = [x_next_list,input_list(2:end)];
+        index_list = [index_list,1:length(input_list)-1];
+    end
 
-     x_n = input_list;
+    error_list0 = abs(x_current_list-x_root);
+    error_list1 = abs(x_next_list-x_root);
+    [x_regression,y_regression] = filter_errors( ...
+        error_list0,error_list1,index_list,filter_list);
 
-     x_n1 = x_n(2:end);
+    [p,k] = generate_error_fit(x_regression,y_regression);
 
-     n = 1:length(x_n);
+    figure;
+    loglog(error_list0,error_list1,'o','Color',[1 .7 .7], 'MarkerFaceColor',[1 .7 .7],'MarkerSize',2);
 
-     my_recorder.clear_input_list();
+    hold on;
+    loglog(x_regression,y_regression,'bo','MarkerFaceColor','b','MarkerSize',2);
 
-     loglog(error_lst,error_lst1,'ro','markerfacecolor','r','markersize',10);
-
-     %plot(x_sol,test_func01(x_sol),'go','markerfacecolor','g','markersize',5);
-    
-
-    % %Secant method example test
-    % x0_guess = -5;
-    % x1_guess = 2;
-    % plot(x0_guess,test_func01(x0_guess),'bo','markerfacecolor','b','markersize',5);
-    % plot(x1_guess,test_func01(x1_guess),'ko','markerfacecolor','k','markersize',5);
-    % 
-    % x_sol = secant_solver(@test_func01,x0_guess,x1_guess,dxtol,ftol,max_iter,dxmax);
-    % plot(x_sol,test_func01(x_sol),'go','markerfacecolor','g','markersize',5);
-
-    
-    % % Bisection method example test
-    % x_left = -5;
-    % x_right = 2;
-    % plot(x_left,test_func01(x_left),'bo','markerfacecolor','b','markersize',5);
-    % plot(x_right,test_func01(x_right),'ko','markerfacecolor','k','markersize',5);
-    % 
-    % x_sol = bisection_solver(@test_func01,x_left,x_right,dxtol,ftol,max_iter);
-    % plot(x_sol,test_func01(x_sol),'go','markerfacecolor','g','markersize',5);
+    fit_line_x = 10.^[-16:.01:1];
+    fit_line_y = k*fit_line_x.^p;
+    loglog(fit_line_x,fit_line_y,'k-','LineWidth',2);
+    axis([1e-16 1e2 1e-16 1e2]);
+    xlabel('Current iteration error');
+    ylabel('Next iteration error');
+    title(sprintf('%s Convergence: %d Trials',solver_name,length(guess_list1)));
+    set(gca,'FontSize',12);
+    legend('Raw error data','Filtered error data', sprintf('Fit: p = %.3f, k = %.4f',p,k),'Location','southoutside');
+    fprintf('%s: p = %.6f, k = %.6f\n',solver_name,p,k);
 end
-
 
 %Definition of the test function and its derivative (as a single function):
 %This definition uses the function keyword
@@ -79,8 +84,28 @@ function [fval,dfdx] = test_func01(x)
     dfdx = 3*(x.^2)/100 - 2*x/8 + 2 +(6/2)*cos(x/2+6) - exp(x/6)/6;
 end
 
+% Filter
 
-%Do not implement your solvers in this file
-%Each solver implementation should get its own separate file
+function [x_regression,y_regression] = filter_errors(error_list0,error_list1,index_list,filter_list)
+    x_regression = [];
+    y_regression = [];
+    for n = 1:length(index_list)
+        if error_list0(n)>filter_list(1) && error_list0(n)<filter_list(2) && ...
+           error_list1(n)>filter_list(3) && error_list1(n)<filter_list(4) && ...
+           index_list(n)>filter_list(5)
+            x_regression(end+1) = error_list0(n);
+            y_regression(end+1) = error_list1(n);
+        end
+    end
+end
 
+% regression function
+function [p,k] = generate_error_fit(x_regression,y_regression)
+    Y = log(y_regression)';
+    X1 = log(x_regression)';
+    X2 = ones(length(X1),1);
+    coeff_vec = regress(Y,[X1,X2]);
+    p = coeff_vec(1);
+    k = exp(coeff_vec(2));
+end
 
