@@ -15,7 +15,7 @@ function [x, exit_flag] = bisection_solver(fun,x_left,x_right,dxtol,ftol,max_ite
     f_left = fun(x_left);
     f_right = fun(x_right);
 
-    % fail
+    % Failure: invalid interval or no bracket around a root.
     if x_left >= x_right || sign(f_left) == sign(f_right)
         x = NaN;
         exit_flag = 0;
@@ -26,13 +26,13 @@ function [x, exit_flag] = bisection_solver(fun,x_left,x_right,dxtol,ftol,max_ite
         x = (x_left + x_right)/2;
         f_mid = fun(x);
 
-        % Success
+        % Success.
         if abs(f_mid) < ftol || (x_right - x_left) < dxtol
             exit_flag = 1;
             return
         end
 
-        % keeping the sign change.
+        % Preserve the half containing the sign change.
         if sign(f_left) == sign(f_mid)
             x_left = x;
             f_left = f_mid;
@@ -41,6 +41,6 @@ function [x, exit_flag] = bisection_solver(fun,x_left,x_right,dxtol,ftol,max_ite
         end
     end
 
-    % Failure: exceeded iteration limit
+    % Failure: exceeded iteration limit.
     exit_flag = 0;
 end
